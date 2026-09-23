@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bendahara Barang Hilang</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="top">
+  <div class="brand">
+    <div class="logo">📦</div>
+    <div>
+      <h1>Bendahara Barang Hilang</h1>
+      <p>Catat · Temukan · Denda &amp; Hukuman</p>
+    </div>
+  </div>
+  <button id="btn-catat-cepat" class="btn btn-primary">+ Catat Barang Hilang</button>
+</header>
+
+<nav class="tabs">
+  <button class="tab-btn active" data-tab="dashboard">📊 Dashboard</button>
+  <button class="tab-btn" data-tab="barang">🗂 Barang Hilang</button>
+  <button class="tab-btn" data-tab="found">🔍 Lost &amp; Found</button>
+  <button class="tab-btn" data-tab="denda">💰 Denda &amp; Hukuman</button>
+  <button class="tab-btn" data-tab="grafik">📈 Grafik</button>
+</nav>
+
+<main>
+
+  <!-- ============ DASHBOARD ============ -->
+  <section id="tab-dashboard" class="tab-panel active">
+    <div class="stats">
+      <div class="stat-card"><div class="stat-num" id="stat-total">0</div><div class="stat-label">Total Barang Tercatat</div></div>
+      <div class="stat-card bad"><div class="stat-num" id="stat-hilang">0</div><div class="stat-label">Masih Hilang</div></div>
+      <div class="stat-card ok"><div class="stat-num" id="stat-ditemukan">0</div><div class="stat-label">Ditemukan / Diserahkan</div></div>
+      <div class="stat-card gold"><div class="stat-num" id="stat-denda">Rp 0</div><div class="stat-label">Total Denda Dibayar</div></div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <h3>📉 Seberapa Sering Barang Hilang (per Orang)</h3>
+        <div id="chart-owner" class="chart"></div>
+        <p class="empty-note" id="chart-owner-empty">Belum ada data.</p>
+      </div>
+      <div class="card">
+        <h3>🧩 Per Kategori</h3>
+        <div id="chart-kat" class="pie-wrap"></div>
+        <ul id="chart-kat-legend" class="legend"></ul>
+        <p class="empty-note" id="chart-kat-empty">Belum ada data.</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>🕒 Laporan Terbaru</h3>
+      <input type="text" id="recent-count" hidden>
+      <div id="recent-list"></div>
+    </div>
+  </section>
+
+  <!-- ============ BARANG HILANG ============ -->
+  <section id="tab-barang" class="tab-panel">
+    <div class="toolbar">
+      <input type="search" id="cari-barang" class="input search" placeholder="🔎 Cari pemilik / barang / lokasi...">
+      <select id="filter-status" class="input">
+        <option value="">Semua Status</option>
+        <option value="hilang">Masih Hilang</option>
+        <option value="ditemukan">Ditemukan</option>
+        <option value="diserahkan">Sudah Diserahkan</option>
+      </select>
+    </div>
+    <div class="card table-card">
+      <table>
+        <thead>
+          <tr>
+            <th>Tanggal</th><th>Pemilik</th><th>Barang</th><th>Kategori</th>
+            <th>Lokasi</th><th>Status</th><th>Hukuman</th><th>Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="tabel-barang"></tbody>
+      </table>
+      <p class="empty-note" id="barang-empty">Belum ada catatan.</p>
+    </div>
+  </section>
+
+  <!-- ============ LOST & FOUND ============ -->
+  <section id="tab-found" class="tab-panel">
+    <div class="toolbar">
+      <input type="search" id="cari-found" class="input search" placeholder="🔎 Cari barang / pemilik yang hilang...">
+    </div>
+
+    <div class="card">
+      <h3>🚨 Barang yang Masih Hilang</h3>
+      <div id="found-hilang" class="found-grid"></div>
+      <p class="empty-note" id="found-hilang-empty">Tidak ada barang hilang saat ini. 🎉</p>
+    </div>
+
+    <div class="card">
+      <h3>✅ Ditemukan — Menunggu Diambil</h3>
+      <div id="found-tersedia" class="found-grid"></div>
+      <p class="empty-note" id="found-tersedia-empty">Tidak ada barang yang menunggu diambil.</p>
+    </div>
+
+    <div class="card">
+      <h3>📤 Sudah Diserahkan ke Pemilik</h3>
+      <div id="found-serah" class="found-grid"></div>
+      <p class="empty-note" id="found-serah-empty">Belum ada yang diserahkan.</p>
+    </div>
+  </section>
+
+  <!-- ============ DENDA & HUKUMAN ============ -->
+  <section id="tab-denda" class="tab-panel">
+    <div class="card">
+      <h3>💸 Catat Denda yang Dibayar</h3>
+      <form id="form-denda" class="form-row">
+        <select id="denda-laporan" class="input" required></select>
+        <input type="number" id="denda-jumlah" class="input" placeholder="Jumlah (Rp)" min="0" required>
+        <input type="date" id="denda-tanggal" class="input" required>
+        <input type="text" id="denda-catatan" class="input" placeholder="Catatan (opsional)">
+        <button type="submit" class="btn btn-primary">Catat Denda</button>
+      </form>
+      <p class="hint" id="denda-hint"></p>
+    </div>
+
+    <div class="card table-card">
+      <h3>📋 Sheet Denda yang Sudah Dibayar</h3>
+      <table>
+        <thead>
+          <tr><th>Tanggal</th><th>Pemilik</th><th>Barang</th><th>Jumlah</th><th>Catatan</th><th>Aksi</th></tr>
+        </thead>
+        <tbody id="tabel-denda"></tbody>
+      </table>
+      <p class="total-denda">Total: <strong id="total-denda">Rp 0</strong></p>
+      <p class="empty-note" id="denda-empty">Belum ada denda tercatat.</p>
+    </div>
+
+    <div class="card table-card">
+      <h3>⚖️ Hukuman per Barang Hilang</h3>
+      <table>
+        <thead>
+          <tr><th>Pemilik</th><th>Barang</th><th>Pilihan Hukuman</th><th>Status</th></tr>
+        </thead>
+        <tbody id="tabel-punish"></tbody>
+      </table>
+      <p class="empty-note" id="punish-empty">Belum ada data untuk dihukum.</p>
+    </div>
+
+    <div class="card">
+      <h3>🛠 Daftar Pilihan Hukuman</h3>
+      <form id="form-punish" class="form-row">
+        <input type="text" id="punish-new" class="input" placeholder="Contoh: Push up 20x" required>
+        <button type="submit" class="btn btn-primary">Tambah</button>
+      </form>
+      <ul id="punish-list" class="chip-list"></ul>
+    </div>
+  </section>
+
+  <!-- ============ GRAFIK ============ -->
+  <section id="tab-grafik" class="tab-panel">
+    <div class="card">
+      <h3>📉 Frekuensi Barang Hilang per Orang</h3>
+      <div id="grafik-owner" class="chart chart-big"></div>
+      <p class="empty-note" id="grafik-owner-empty">Belum ada data.</p>
+    </div>
+    <div class="card">
+      <h3>🧩 Barang Hilang per Kategori</h3>
+      <div id="grafik-kat" class="pie-wrap"></div>
+      <ul id="grafik-kat-legend" class="legend"></ul>
+      <p class="empty-note" id="grafik-kat-empty">Belum ada data.</p>
+    </div>
+    <div class="card">
+      <h3>💸 Denda Terkumpul per Bulan</h3>
+      <div id="grafik-denda" class="chart"></div>
+      <p class="empty-note" id="grafik-denda-empty">Belum ada denda.</p>
+    </div>
+  </section>
+
+</main>
+
+<!-- ============ MODAL CATAT BARANG ============ -->
+<div id="modal-overlay" class="overlay hidden">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="modal-title">Catat Barang Hilang</h3>
+      <button id="modal-close" class="icon-btn">✕</button>
+    </div>
+    <form id="form-barang">
+      <input type="hidden" id="record-id">
+      <div class="form-grid">
+        <label>Nama Pemilik <input type="text" id="f-owner" class="input" list="daftar-pemilik" placeholder="Mis. Budi" required></label>
+        <label>Nama Barang <input type="text" id="f-nama" class="input" placeholder="Mis. Payung hitam" required></label>
+        <label>Kategori
+          <select id="f-kategori" class="input">
+            <option>Alat Tulis</option><option>Elektronik</option><option>Pakaian</option>
+            <option>Alat Makan</option><option>Kesehatan</option><option>Olahraga</option>
+            <option>Uang</option><option>Aksesoris</option><option>Lainnya</option>
+          </select>
+        </label>
+        <label>Tanggal Hilang <input type="date" id="f-tanggal" class="input" required></label>
+        <label>Lokasi Terakhir <input type="text" id="f-lokasi" class="input" placeholder="Mis. Ruang kelas 3A"></label>
+        <label>Perkiraan Harga (Rp) <input type="number" id="f-harga" class="input" min="0" placeholder="Opsional"></label>
+        <label>Pilihan Hukuman
+          <select id="f-hukuman" class="input"></select>
+        </label>
+        <label class="colspan">Deskripsi / Ciri Khas
+          <textarea id="f-deskripsi" class="input" rows="2" placeholder="Warna, merek, ciri khas..."></textarea>
+        </label>
+        <label class="colspan">Catatan
+          <input type="text" id="f-catatan" class="input" placeholder="Catatan tambahan (opsional)">
+        </label>
+      </div>
+      <div class="modal-foot">
+        <button type="button" id="btn-batal" class="btn btn-ghost">Batal</button>
+        <button type="submit" class="btn btn-primary">Simpan</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<datalist id="daftar-pemilik"></datalist>
+
+<footer class="foot">
+  <p>Aplikasi Bendahara Barang Hilang — data tersimpan di browser ini.</p>
+  <div>
+    <button id="btn-export" class="btn btn-ghost">💾 Backup Data (JSON)</button>
+    <button id="btn-import" class="btn btn-ghost">📂 Pulihkan Data</button>
+    <input type="file" id="file-import" accept=".json,application/json" hidden>
+    <button id="btn-reset" class="btn btn-danger-ghost">🗑 Reset Semua Data</button>
+  </div>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>
